@@ -7,6 +7,7 @@ import webrtcvad
 
 # Modified main() of https://github.com/wiseman/py-webrtcvad/blob/master/example.py
 
+
 def read_wave(path):
     """Reads a .wav file.
     Takes the path, and returns (PCM audio data, sample rate).
@@ -35,6 +36,7 @@ def write_wave(path, audio, sample_rate):
 
 class Frame(object):
     """Represents a "frame" of audio data."""
+
     def __init__(self, bytes, timestamp, duration):
         self.bytes = bytes
         self.timestamp = timestamp
@@ -141,10 +143,9 @@ def main(args):
     segments = vad_collector(sample_rate, 30, 300, vad, frames)
     total_wav = b""
     for i, segment in enumerate(segments):
-    	total_wav += segment
-    	#print(str(i)+"th segment appended")
-    	
-    
+        total_wav += segment
+        #print(str(i)+"th segment appended")
+
     path = 'test.wav'
     #print(' Writing %s' % (path,))
     write_wave(path, total_wav, sample_rate)
