@@ -64,7 +64,6 @@ class Feeder():
 
         # file_name for ex) id10343_pCDWKHjQjso_00002
         for wav_id, wav_path in enumerate(wavs_list):
-            pdb.set_trace()
             file_on_memory = io.BytesIO(wav_path)
             audio, sample_rate = sf.read(file_on_memory)
             print("audio.shape:")
