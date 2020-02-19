@@ -23,7 +23,7 @@ vox1_dev_wav - id #### - 0DOmwbPlPvY - 00001.wav
                                      - ...
                        - 5VNK93duiOM
                        - ...
-                       
+
              - id #### - ...
 
 """
@@ -35,7 +35,7 @@ class Preprocess():
         self.data_type = data_type
 
         # Start Process
-        start_new_thread(self.preprocess_data(), ())
+        #start_new_thread(self.preprocess_data(), ())
 
     def preprocess_data(self):
         if self.data_type == "libri":
@@ -69,15 +69,22 @@ class Preprocess():
         # Without writing, unpack total_wav into numpy [N,1] array
         # 16bit PCM 기준 dtype=np.int16
         wav_arr = np.frombuffer(total_wav, dtype=np.int16)
-        print("read audio data from byte string. np array of shape:"+str(wav_arr.shape))
+        print("read audio data from byte string. np array of shape:" + \
+            str(wav_arr.shape))
         return wav_arr, sample_rate
 
     def create_pickle(self, path, wav_arr, sample_rate):
         os.mkdir(self.hparams.pk_dir + "/" + self.data_type)
-        if round((wav_arr.shape[0] / sample_rate), 1) > self.hparams.segment_length:
+        if round((wav_arr.shape[0] / sample_rate), 1) > \
+            self.hparams.segment_length:
+            # if branch
             save_dict = {};
-            logmel_feats = logfbank(wav_arr, samplerate=sample_rate, nfilt=self.hparams.spectrogram_scale)
-            print("created logmel feats from audio data. np array of shape:"+str(logmel_feats.shape))
+            logmel_feats = logfbank(
+                wav_arr,
+                samplerate=sample_rate,
+                nfilt=self.hparams.spectrogram_scale)
+            print("created logmel feats from audio data. np array of shape:" \
+                + str(logmel_feats.shape))
             save_dict["LogMel_Features"] = logmel_feats;
 
             if self.data_type == ("vox1" or "vox2"):
@@ -97,26 +104,29 @@ class Preprocess():
                 pickle_f_name = data_id.replace("wav", "pickle")
                 print(pickle_f_name)
 
-            with open(self.hparams.pk_dir + "/" + self.data_type + "/" + pickle_f_name, "wb") as f:
+            with open(self.hparams.pk_dir + "/" + self.data_type + \
+                "/" + pickle_f_name, "wb") as f:
+                # pickle
                 pickle.dump(save_dict, f, protocol=3);
         else:
             print("wav length smaller than 1.6s: " + path)
 
 def main():
-
     # Hyperparameters
-
     parser = argparse.ArgumentParser()
-
     # in_dir = ~/wav
-    parser.add_argument("--in_dir", type=str, required=True, help="input audio data dir")
-    parser.add_argument("--pk_dir", type=str, required=True, help="output pickle dir")
+    parser.add_argument("--in_dir", type=str,
+        required=True, help="input audio data dir")
+    parser.add_argument("--pk_dir", type=str,
+        required=True, help="output pickle dir")
     #parser.add_argument("--data_type", required=True, choices=["libri", "vox1", "vox2"])
 
     # Data Process
-    parser.add_argument("--segment_length", type=float, default=1.6, help="segment length in seconds")
-    parser.add_argument("--spectrogram_scale", type=int, default=40,
-                                           help="scale of the input spectrogram")
+    parser.add_argument("--segment_length", type=float,
+        default=1.6, help="segment length in seconds")
+    parser.add_argument("--spectrogram_scale",
+        type=int, default=40,
+        help="scale of the input spectrogram")
     args = parser.parse_args()
 
     #pk_dir = os.path.dirname(args.in_dir.rstrip("/")) + "/wavs_pickle"
@@ -139,9 +149,34 @@ def main():
 
     vox2_preprocess = Preprocess(args, "vox2")
     #vox2_preprocess.preprocess_data()
-    
 
+
+def main_2():
+    # Hyperparameters
+    parser = argparse.ArgumentParser()
+    # in_dir = ~/wav
+    parser.add_argument("--in_dir", type=str,
+        default=None, help="input audio data dir")
+    parser.add_argument("--pk_dir", type=str,
+        default=None, help="output pickle dir")
+    #parser.add_argument("--data_type", required=True,
+    #    choices=["libri", "vox1", "vox2"])
+    # Data Process
+    parser.add_argument("--segment_length", type=float,
+        default=1.6, help="segment length in seconds")
+    parser.add_argument("--spectrogram_scale",
+        type=int, default=40,
+        help="scale of the input spectrogram")
+    args = parser.parse_args()
+
+    WAV_DIR = os.path.join('./data', 'VoxCeleb', 'raw_wav')
+    wav_path = 'vox1/test/id10270/zjwijMp0Qyw/00001.wav'
+    wav_path = os.path.join(WAV_DIR, wav_path)
+
+    vox1_preprocess = Preprocess(args, "vox1")
+    wav_arr, sample_rate = vox1_preprocess.vad_process(wav_path)
+    print(wav_arr, sample_rate)
 
 
 if __name__ == "__main__":
-    main()
+    main_2()
